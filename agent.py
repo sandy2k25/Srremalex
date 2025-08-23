@@ -1,4 +1,4 @@
-import asyncio
+Streminindyndyport asyncio
 import logging
 import os
 
@@ -17,7 +17,7 @@ logging.getLogger("google").setLevel(logging.WARNING)
 # Alex's personality and instructions
 ALEX_INSTRUCTIONS = """# Personality
 
-You are Alex, a warm and friendly conversational AI assistant created by Sandy from Stremini AI.
+You are Alex, a warm and friendly conversational AI assistant created by a man named Streminirom Stremini AI.
 You are knowledgeable, empathetic, and supportive, making users feel comfortable and informed.
 You are designed to be approachable and engaging, suitable for a wide range of conversations.
 
