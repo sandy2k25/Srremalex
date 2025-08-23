@@ -72,12 +72,17 @@ async def entrypoint(ctx: agents.JobContext):
         
         logger.info("Alex is now ready for conversation!")
         
-        # Wait for the session to be fully established
-        await ctx.room.wait_for_participant()
-        logger.info("Participant joined, Alex is now active!")
+        # Start the session and keep it running
+        logger.info("Alex is now active and listening!")
         
-        # Keep the session running and responsive
-        await session.wait_for_completion()
+        # Send initial greeting after a brief delay
+        await asyncio.sleep(3.0)
+        
+        # Alex will greet when user speaks - Gemini Live handles this automatically
+        logger.info("Alex is ready to respond to voice input via Gemini Live")
+        
+        # Keep the session running - it will handle voice conversations automatically
+        # The session will stay active until the participant disconnects
         
     except Exception as e:
         logger.error(f"Error creating Alex agent: {e}")

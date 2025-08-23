@@ -83,8 +83,14 @@ class AlexVoiceAgent {
                 autoSubscribe: true,
             });
             
-            // Enable microphone by default
-            await this.enableMicrophone();
+            // Enable microphone by default with better handling  
+            try {
+                await this.enableMicrophone();
+            } catch (micError) {
+                // Continue even if microphone fails - user can try manually later
+                console.warn('Initial microphone setup failed, continuing anyway:', micError);
+                this.addMessage('System', '⚠️ Click the microphone button to enable voice chat with Alex');
+            }
             
             this.isConnected = true;
             this.updateStatus('Connected to Alex', true);
