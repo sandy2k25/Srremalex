@@ -1,13 +1,18 @@
 [build]
-  publish = "static"
+  publish = "."
   command = "echo 'Static build complete'"
 
 [functions]
   directory = "netlify/functions"
 
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  from = "/api/token"
+  to = "/.netlify/functions/token"
+  status = 200
+
+[[redirects]]
+  from = "/api/create-room"
+  to = "/.netlify/functions/create-room"
   status = 200
 
 [[redirects]]
