@@ -81,8 +81,16 @@ async def entrypoint(ctx: agents.JobContext):
         # Alex will greet when user speaks - Gemini Live handles this automatically
         logger.info("Alex is ready to respond to voice input via Gemini Live")
         
-        # Keep the session running - it will handle voice conversations automatically
-        # The session will stay active until the participant disconnects
+        # Keep the session running indefinitely to handle voice conversations
+        try:
+            # This keeps the session alive to process voice input and generate responses
+            while True:
+                await asyncio.sleep(1)
+                # The session will automatically handle voice input/output via Gemini Live
+        except Exception as session_error:
+            logger.error(f"Session error: {session_error}")
+        finally:
+            logger.info("Alex session ended")
         
     except Exception as e:
         logger.error(f"Error creating Alex agent: {e}")
