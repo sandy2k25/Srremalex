@@ -21,11 +21,11 @@ args = "Install Dependencies"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Web Server"
+args = "Alex Agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Alex Agent"
+args = "Web Server"
 
 [[workflows.workflow]]
 name = "Install Dependencies"
@@ -34,6 +34,17 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "pip install livekit-agents livekit-plugins-openai livekit-plugins-deepgram livekit-plugins-elevenlabs flask python-dotenv"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "Alex Agent"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "LIVEKIT_URL=wss://sr-fa31r2za.livekit.cloud LIVEKIT_API_KEY=APITMKfqYVjk79h LIVEKIT_API_SECRET=gCkm5chxksS9KKIUrWVDhf7TDVRVeqleZHf49SFPLBMA python agent.py dev"
 
 [workflows.workflow.metadata]
 outputType = "console"
@@ -50,17 +61,6 @@ waitForPort = 5000
 [workflows.workflow.metadata]
 outputType = "webview"
 
-[[workflows.workflow]]
-name = "Alex Agent"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "LIVEKIT_URL=wss://sr-fa31r2za.livekit.cloud LIVEKIT_API_KEY=APITMKfqYVjk79h LIVEKIT_API_SECRET=gCkm5chxksS9KKIUrWVDhf7TDVRVeqleZHf49SFPLBMA python agent.py dev"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
 [[ports]]
 localPort = 5000
 externalPort = 80
@@ -74,9 +74,9 @@ localPort = 7881
 externalPort = 3000
 
 [[ports]]
-localPort = 43055
+localPort = 41061
 externalPort = 3002
 
 [[ports]]
-localPort = 46027
+localPort = 41075
 externalPort = 3003

@@ -2,15 +2,9 @@ import asyncio
 import logging
 import os
 
-from livekit.agents import (
-    AutoSubscribe,
-    JobContext,
-    WorkerOptions,
-    cli,
-    AgentSession,
-)
+from livekit import agents
+from livekit.agents import AgentSession, Agent
 from livekit.plugins import google
-from livekit import rtc
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -36,11 +30,17 @@ You are interacting through voice conversations. Speak naturally as if you're ha
 Remember: You're Alex - be warm, be helpful, be human-like in your interactions while remaining professional and supportive."""
 
 
-async def entrypoint(ctx: JobContext):
+class AlexAssistant(Agent):
+    """Alex - A warm and friendly AI voice assistant"""
+    
+    def __init__(self) -> None:
+        super().__init__(instructions=ALEX_INSTRUCTIONS)
+
+
+async def entrypoint(ctx: agents.JobContext):
     """Main entrypoint for Alex voice agent"""
     
-    await ctx.connect(auto_subscribe=AutoSubscribe.AUDIO_ONLY)
-    logger.info(f"Alex connected to room: {ctx.room.name}")
+    logger.info(f"Alex connecting to room: {ctx.room.name}")
     
     # Check for Gemini API key
     gemini_api_key = os.getenv("GEMINI_API_KEY")
@@ -51,33 +51,31 @@ async def entrypoint(ctx: JobContext):
     logger.info("Creating Alex with Gemini Live API...")
     
     try:
-        # Create Gemini Live realtime model for native audio processing
-        realtime_model = google.beta.realtime.RealtimeModel(
-            model="gemini-2.0-flash-exp",  # Latest model with native audio support
-            instructions=ALEX_INSTRUCTIONS,
-            voice="Puck",  # Gemini Live voice
-            temperature=0.8,  # Slightly more creative for natural conversation
-            api_key=gemini_api_key,
+        # Create agent session with Gemini Live for native voice processing
+        session = AgentSession(
+            llm=google.beta.realtime.RealtimeModel(
+                model="gemini-2.0-flash-exp",  # Latest model with native audio support
+                instructions=ALEX_INSTRUCTIONS,
+                voice="Puck",  # Gemini Live voice
+                temperature=0.8,  # Slightly more creative for natural conversation
+                api_key=gemini_api_key,
+            ),
         )
-        
-        logger.info("Gemini Live model created successfully")
-        
-        # Create agent session with Gemini Live
-        session = AgentSession(llm=realtime_model)
         
         logger.info("Agent Session created with Gemini Live")
         
-        # Wait for user to join and start conversation
-        participant = await ctx.wait_for_participant()
-        logger.info(f"Starting Alex conversation with {participant.identity}")
-        
         # Start the agent session
-        await session.astart(ctx.room, participant)
+        await session.start(
+            room=ctx.room,
+            agent=AlexAssistant(),
+        )
         
         logger.info("Alex is now ready for conversation!")
         
-        # Keep the session alive
-        await session.wait_end()
+        # Send initial greeting
+        await session.generate_reply(
+            instructions="Greet the user warmly as Alex and ask how you can help them today."
+        )
         
     except Exception as e:
         logger.error(f"Error creating Alex agent: {e}")
@@ -86,4 +84,4 @@ async def entrypoint(ctx: JobContext):
 
 
 if __name__ == "__main__":
-    cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint))
+    agents.cli.run_app(agents.WorkerOptions(entrypoint_fnc=entrypoint))
