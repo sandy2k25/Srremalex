@@ -12,7 +12,7 @@ from livekit.agents import (
 )
 from livekit.plugins import openai, deepgram, elevenlabs
 from livekit import rtc
-from google import genai
+import google.genai as genai
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
