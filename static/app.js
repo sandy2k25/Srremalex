@@ -46,6 +46,12 @@ class AlexVoiceAgent {
             this.updateStatus('Connecting...', false);
             this.connectBtn.disabled = true;
 
+            // Wait for LiveKit library to be available
+            if (typeof LiveKit === 'undefined') {
+                this.updateStatus('Loading LiveKit library...', false);
+                await this.waitForLiveKit();
+            }
+
             // Get access token from server
             const tokenResponse = await fetch('/api/token');
             if (!tokenResponse.ok) {
@@ -310,6 +316,27 @@ class AlexVoiceAgent {
         } else {
             this.statusIndicator.classList.remove('connected');
         }
+    }
+
+    async waitForLiveKit() {
+        // Wait up to 10 seconds for LiveKit to load
+        let attempts = 0;
+        const maxAttempts = 50; // 10 seconds with 200ms intervals
+        
+        return new Promise((resolve, reject) => {
+            const checkLiveKit = () => {
+                if (typeof LiveKit !== 'undefined') {
+                    console.log('LiveKit library is now available');
+                    resolve();
+                } else if (attempts >= maxAttempts) {
+                    reject(new Error('LiveKit library failed to load'));
+                } else {
+                    attempts++;
+                    setTimeout(checkLiveKit, 200);
+                }
+            };
+            checkLiveKit();
+        });
     }
 
     updateUI() {

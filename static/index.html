@@ -6,7 +6,25 @@
     <title>Alex - Your Voice AI Assistant</title>
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://unpkg.com/livekit-client@2.6.0/dist/livekit-client.umd.min.js"></script>
+    <script src="https://unpkg.com/livekit-client@latest/dist/livekit-client.umd.min.js"></script>
+    <script>
+        // Fallback script to ensure LiveKit is available
+        if (typeof LiveKit === 'undefined') {
+            console.error('LiveKit library failed to load from CDN');
+            // Try alternative CDN
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/livekit-client@latest/dist/livekit-client.umd.min.js';
+            script.onload = function() {
+                console.log('LiveKit loaded from alternative CDN');
+            };
+            script.onerror = function() {
+                console.error('Failed to load LiveKit from alternative CDN');
+            };
+            document.head.appendChild(script);
+        } else {
+            console.log('LiveKit library loaded successfully');
+        }
+    </script>
 </head>
 <body>
     <div class="container">
