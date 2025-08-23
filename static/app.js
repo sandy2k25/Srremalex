@@ -55,13 +55,20 @@ class AlexVoiceAgent {
             this.room = new LiveKit.Room({
                 adaptiveStream: true,
                 dynacast: true,
+                publishDefaults: {
+                    videoSimulcastLayers: [],
+                },
             });
 
             // Set up room event listeners
             this.setupRoomEventListeners();
 
+            console.log('Connecting to LiveKit with:', { url, identity, room });
+            
             // Connect to the room
-            await this.room.connect(url, token);
+            await this.room.connect(url, token, {
+                autoSubscribe: true,
+            });
             
             // Enable microphone by default
             await this.enableMicrophone();
@@ -75,8 +82,29 @@ class AlexVoiceAgent {
 
         } catch (error) {
             console.error('Connection failed:', error);
-            this.updateStatus('Connection failed', false);
-            this.addMessage('System', `Connection failed: ${error.message}`);
+            console.error('Error details:', {
+                name: error.name,
+                message: error.message,
+                code: error.code,
+                reason: error.reason,
+                stack: error.stack,
+                url: url,
+                token: token ? 'Token received' : 'No token',
+                errorType: typeof error,
+                errorConstructor: error.constructor.name
+            });
+            
+            let errorMessage = 'Unknown connection error';
+            if (error.message) {
+                errorMessage = error.message;
+            } else if (error.reason) {
+                errorMessage = error.reason;
+            } else if (error.code) {
+                errorMessage = `Error code: ${error.code}`;
+            }
+            
+            this.updateStatus(`Connection failed: ${errorMessage}`, false);
+            this.addMessage('System', `Connection failed: ${errorMessage}`);
         } finally {
             this.connectBtn.disabled = false;
         }
