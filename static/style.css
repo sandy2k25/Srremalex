@@ -182,11 +182,13 @@ body {
 }
 
 .avatar-logo {
-    width: 120px;
-    height: 120px;
-    object-fit: contain;
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+    object-position: center;
     filter: brightness(1.1);
     transition: var(--transition);
+    border-radius: var(--border-radius-full);
 }
 
 .avatar-ring {
@@ -530,8 +532,8 @@ body {
     }
     
     .avatar-logo {
-        width: 100px;
-        height: 100px;
+        width: 120px;
+        height: 120px;
     }
     
     #agentStatusText {
@@ -556,8 +558,8 @@ body {
     }
     
     .avatar-logo {
-        width: 80px;
-        height: 80px;
+        width: 100px;
+        height: 100px;
     }
     
     .secondary-controls {
