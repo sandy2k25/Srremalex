@@ -35,7 +35,9 @@ def get_token():
     try:
         # Get participant identity from query params or generate one
         identity = request.args.get('identity', f'user_{datetime.now().strftime("%Y%m%d_%H%M%S")}')
-        room_name = request.args.get('room', DEFAULT_ROOM_NAME)
+        
+        # Generate unique private room for each user (no shared rooms)
+        room_name = request.args.get('room', f'alex-private-{identity}')
         
         # Create access token
         token = AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET)
