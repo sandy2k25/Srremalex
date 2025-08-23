@@ -39,6 +39,9 @@ class AlexVoiceAgent {
     }
 
     async connect() {
+        let url = null;
+        let token = null;
+        
         try {
             this.updateStatus('Connecting...', false);
             this.connectBtn.disabled = true;
@@ -49,7 +52,11 @@ class AlexVoiceAgent {
                 throw new Error('Failed to get access token');
             }
 
-            const { token, url, room, identity } = await tokenResponse.json();
+            const tokenData = await tokenResponse.json();
+            token = tokenData.token;
+            url = tokenData.url;
+            const room = tokenData.room;
+            const identity = tokenData.identity;
 
             // Initialize LiveKit room
             this.room = new LiveKit.Room({
@@ -88,7 +95,7 @@ class AlexVoiceAgent {
                 code: error.code,
                 reason: error.reason,
                 stack: error.stack,
-                url: url,
+                url: url || 'URL not available',
                 token: token ? 'Token received' : 'No token',
                 errorType: typeof error,
                 errorConstructor: error.constructor.name
