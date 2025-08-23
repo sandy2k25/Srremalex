@@ -14,4 +14,5 @@ dependencies = [
     "livekit-plugins-openai>=1.2.6",
     "pyjwt>=2.10.1",
     "sift-stack-py>=0.8.4",
+    "livekit-plugins-google>=1.2.6",
 ]
