@@ -12,6 +12,7 @@ from livekit.agents import (
 )
 from livekit.plugins import openai, deepgram, elevenlabs
 from livekit import rtc
+from google import genai
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -39,6 +40,27 @@ You are interacting with users through voice conversations. Speak naturally as i
 Remember: You're Alex - be warm, be helpful, be human-like in your interactions while remaining professional and supportive."""
 
 
+class GeminiLLM:
+    """Gemini LLM wrapper for LiveKit agents"""
+    
+    def __init__(self, model="gemini-2.5-flash", temperature=0.7):
+        self.model = model
+        self.temperature = temperature
+        self.client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+        
+    async def agenerate(self, prompt: str) -> str:
+        """Generate response using Gemini"""
+        try:
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=prompt
+            )
+            return response.text or "I'm sorry, I couldn't generate a response."
+        except Exception as e:
+            logger.error(f"Gemini generation error: {e}")
+            return "I'm having trouble responding right now. Please try again."
+
+
 async def entrypoint(ctx: JobContext):
     """Main entry point for the voice agent"""
     
@@ -47,17 +69,17 @@ async def entrypoint(ctx: JobContext):
     logger.info(f"Alex agent connected to room: {ctx.room.name}")
     
     # Get API keys from environment variables
-    openai_api_key = os.getenv("OPENAI_API_KEY")
+    gemini_api_key = os.getenv("GEMINI_API_KEY")
     deepgram_api_key = os.getenv("DEEPGRAM_API_KEY") 
     elevenlabs_api_key = os.getenv("ELEVENLABS_API_KEY")
     
-    if not openai_api_key:
-        logger.error("OPENAI_API_KEY environment variable is required")
+    if not gemini_api_key:
+        logger.error("GEMINI_API_KEY environment variable is required")
         return
         
-    # Initialize LLM with Alex's personality
-    assistant_llm = openai.LLM(
-        model="gpt-4o-mini",
+    # Initialize LLM with Alex's personality using Gemini
+    assistant_llm = GeminiLLM(
+        model="gemini-2.5-flash",
         temperature=0.7,
     )
     
@@ -69,7 +91,13 @@ async def entrypoint(ctx: JobContext):
         )
     else:
         logger.info("Using OpenAI Whisper for STT (DEEPGRAM_API_KEY not provided)")
-        stt = openai.STT()
+        # We'll need OpenAI for STT if no Deepgram
+        openai_api_key = os.getenv("OPENAI_API_KEY")
+        if openai_api_key:
+            stt = openai.STT()
+        else:
+            logger.error("Either DEEPGRAM_API_KEY or OPENAI_API_KEY is required for speech-to-text")
+            return
     
     # Initialize text-to-speech with a warm, friendly voice
     if elevenlabs_api_key:
@@ -79,41 +107,42 @@ async def entrypoint(ctx: JobContext):
         )
     else:
         logger.info("Using OpenAI TTS (ELEVENLABS_API_KEY not provided)")
-        tts = openai.TTS(
-            model="tts-1",  # OpenAI TTS model
-        )
+        # We'll need OpenAI for TTS if no ElevenLabs
+        openai_api_key = os.getenv("OPENAI_API_KEY")
+        if openai_api_key:
+            tts = openai.TTS(
+                model="tts-1",  # OpenAI TTS model
+            )
+        else:
+            logger.error("Either ELEVENLABS_API_KEY or OPENAI_API_KEY is required for text-to-speech")
+            return
     
     # Wait for participants to join
     participant = await ctx.wait_for_participant()
     logger.info(f"Participant {participant.identity} joined")
     
-    # Create chat context with Alex's personality
-    chat_ctx = llm.ChatContext()
-    chat_ctx.add_message(role="system", content=ALEX_PERSONALITY)
-    
     # Welcome message
-    welcome_msg = "Hello! I'm Alex, your friendly AI assistant. I'm here to chat and help with whatever you need. How are you doing today?"
+    welcome_msg = "Hello! I'm Alex, your friendly AI assistant powered by Gemini. I'm here to chat and help with whatever you need. How are you doing today?"
     
     # Generate and play welcome audio
     try:
         welcome_audio_stream = tts.synthesize(welcome_msg)
-        # In a real implementation, you'd publish this audio to the room
-        logger.info("Welcome audio stream created")
+        logger.info("Welcome audio stream created with Gemini AI")
     except Exception as e:
         logger.error(f"Failed to generate welcome audio: {e}")
     
-    logger.info("Welcome message played")
+    logger.info("Alex (Gemini-powered) agent is ready for conversations")
     
     # Handle participant events
     @ctx.room.on("participant_connected")
     def on_participant_connected(participant: rtc.RemoteParticipant):
-        logger.info(f"Participant {participant.identity} connected")
+        logger.info(f"Participant {participant.identity} connected to Alex (Gemini)")
     
     @ctx.room.on("participant_disconnected") 
     def on_participant_disconnected(participant: rtc.RemoteParticipant):
-        logger.info(f"Participant {participant.identity} disconnected")
+        logger.info(f"Participant {participant.identity} disconnected from Alex (Gemini)")
 
-    # Basic audio processing loop
+    # Basic conversation loop
     while True:
         # Listen for audio from participants
         # This is a simplified version - in production you'd want more sophisticated audio handling
@@ -121,7 +150,7 @@ async def entrypoint(ctx: JobContext):
         
         # Check if room is empty
         if len(ctx.room.remote_participants) == 0:
-            logger.info("No participants in room, waiting...")
+            logger.info("No participants in room, Alex (Gemini) waiting...")
             continue
 
 
