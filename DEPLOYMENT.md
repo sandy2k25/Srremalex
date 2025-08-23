@@ -44,13 +44,14 @@ Your app is now compatible with both Netlify and Vercel! The app has been restru
    - Connect your repository
    - Netlify will auto-detect the `netlify.toml` configuration
 
-3. **Environment Variables** (if needed):
+3. **Environment Variables** (required):
    - Go to Site settings → Environment variables
    - Add these variables:
      ```
      LIVEKIT_API_KEY=your_api_key
      LIVEKIT_API_SECRET=your_api_secret
      LIVEKIT_URL=your_livekit_url
+     GEMINI_API_KEY=your_gemini_api_key
      ```
 
 ### Option 2: Drag & Drop
@@ -83,6 +84,7 @@ Your app is now compatible with both Netlify and Vercel! The app has been restru
      LIVEKIT_API_KEY=your_api_key
      LIVEKIT_API_SECRET=your_api_secret
      LIVEKIT_URL=your_livekit_url
+     GEMINI_API_KEY=your_gemini_api_key
      ```
 
 ### Option 2: Vercel CLI
@@ -113,6 +115,7 @@ Both platforms need these environment variables:
 | `LIVEKIT_API_KEY` | LiveKit API key | `APITMKfqYVjk79h` |
 | `LIVEKIT_API_SECRET` | LiveKit API secret | `gCkm5chxksS9KKIUrWVDhf7TDVRVeqleZHf49SFPLBMA` |
 | `LIVEKIT_URL` | LiveKit server URL | `wss://sr-fa31r2za.livekit.cloud` |
+| `GEMINI_API_KEY` | Google Gemini API key (required) | *Must be provided* |
 
 ⚠️ **Security Note**: Update the default values with your own LiveKit credentials before deploying to production.
 
