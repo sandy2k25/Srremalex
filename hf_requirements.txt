@@ -1,6 +1,0 @@
-fastrtc[vad,tts,stt]>=0.0.20
-gradio>=5.0.0
-google-generativeai
-numpy
-pydantic
-python-dotenv
