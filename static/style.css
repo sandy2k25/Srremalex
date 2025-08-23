@@ -102,6 +102,7 @@ body {
     font-size: 0.875rem;
     color: var(--text-secondary);
     font-weight: 400;
+    white-space: nowrap;
 }
 
 .connection-status {
