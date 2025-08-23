@@ -249,8 +249,17 @@ class AlexVoiceAgent {
 
     async enableMicrophone() {
         try {
+            // First, show user we're requesting permission
+            this.addMessage('System', 'Requesting microphone access...');
+            
             // Request microphone permission first
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                } 
+            });
             console.log('Got microphone permission');
             
             // Stop the test stream
@@ -261,12 +270,19 @@ class AlexVoiceAgent {
             this.isMuted = false;
             this.micBtn.classList.add('active');
             console.log('Microphone enabled successfully');
-            this.addMessage('System', 'Microphone enabled - Alex can now hear you!');
+            this.addMessage('System', '✓ Microphone enabled! Start speaking - Alex will respond with voice.');
         } catch (error) {
             console.error('Failed to enable microphone:', error);
-            this.addMessage('System', 'Please allow microphone access for Alex to hear you. Click the microphone icon in your browser\'s address bar.');
             
-            // Try to continue without throwing - maybe the user will grant permission later
+            if (error.name === 'NotAllowedError') {
+                this.addMessage('System', '🎤 Please click "Allow" when your browser asks for microphone permission. Alex needs to hear you to respond!');
+            } else if (error.name === 'NotFoundError') {
+                this.addMessage('System', '🎤 No microphone found. Please connect a microphone to chat with Alex.');
+            } else {
+                this.addMessage('System', '🎤 Microphone access failed. Please check your browser permissions and try again.');
+            }
+            
+            // Still continue - maybe user will fix it
             this.isMuted = true;
             this.micBtn.classList.remove('active');
         }

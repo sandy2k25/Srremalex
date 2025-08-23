@@ -72,21 +72,12 @@ async def entrypoint(ctx: agents.JobContext):
         
         logger.info("Alex is now ready for conversation!")
         
-        # Wait a moment for the user to connect, then send a greeting
-        await asyncio.sleep(2.0)
+        # Wait for the session to be fully established
+        await ctx.room.wait_for_participant()
+        logger.info("Participant joined, Alex is now active!")
         
-        # Send initial greeting
-        try:
-            await ctx.room.local_participant.publish_data(
-                "Hello! I'm Alex, your friendly AI assistant. I'm ready to chat with you using voice! Please speak and I'll respond.",
-                kind=agents.DataPacketKind.RELIABLE,
-            )
-            logger.info("Sent initial greeting")
-        except Exception as greeting_error:
-            logger.error(f"Failed to send greeting: {greeting_error}")
-            
-        # Keep the session alive
-        logger.info("Alex session is active and ready for conversation")
+        # Keep the session running and responsive
+        await session.wait_for_completion()
         
     except Exception as e:
         logger.error(f"Error creating Alex agent: {e}")
