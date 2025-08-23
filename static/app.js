@@ -249,13 +249,26 @@ class AlexVoiceAgent {
 
     async enableMicrophone() {
         try {
+            // Request microphone permission first
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            console.log('Got microphone permission');
+            
+            // Stop the test stream
+            stream.getTracks().forEach(track => track.stop());
+            
+            // Now enable microphone through LiveKit
             await this.room.localParticipant.setMicrophoneEnabled(true);
             this.isMuted = false;
             this.micBtn.classList.add('active');
-            console.log('Microphone enabled');
+            console.log('Microphone enabled successfully');
+            this.addMessage('System', 'Microphone enabled - Alex can now hear you!');
         } catch (error) {
             console.error('Failed to enable microphone:', error);
-            this.addMessage('System', 'Failed to access microphone. Please check your permissions.');
+            this.addMessage('System', 'Please allow microphone access for Alex to hear you. Click the microphone icon in your browser\'s address bar.');
+            
+            // Try to continue without throwing - maybe the user will grant permission later
+            this.isMuted = true;
+            this.micBtn.classList.remove('active');
         }
     }
 
