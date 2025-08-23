@@ -6,24 +6,38 @@
     <title>Alex - Your Voice AI Assistant</title>
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://unpkg.com/livekit-client@latest/dist/livekit-client.umd.min.js"></script>
+    <script src="/static/livekit-client.umd.min.js"></script>
     <script>
-        // Fallback script to ensure LiveKit is available
-        if (typeof LiveKit === 'undefined') {
-            console.error('LiveKit library failed to load from CDN');
-            // Try alternative CDN
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/livekit-client@latest/dist/livekit-client.umd.min.js';
-            script.onload = function() {
-                console.log('LiveKit loaded from alternative CDN');
-            };
-            script.onerror = function() {
-                console.error('Failed to load LiveKit from alternative CDN');
-            };
-            document.head.appendChild(script);
-        } else {
-            console.log('LiveKit library loaded successfully');
+        // Global variable to track LiveKit loading status
+        window.liveKitLoaded = false;
+        window.liveKitCallbacks = [];
+        
+        // Function to notify when LiveKit is ready
+        function notifyLiveKitReady() {
+            window.liveKitLoaded = true;
+            console.log('LiveKit library is ready');
+            window.liveKitCallbacks.forEach(callback => callback());
+            window.liveKitCallbacks = [];
         }
+        
+        // Check if LiveKit loaded from local file with proper timing
+        setTimeout(() => {
+            if (typeof LiveKit !== 'undefined') {
+                console.log('LiveKit loaded successfully from local file');
+                notifyLiveKitReady();
+            } else if (typeof LivekitClient !== 'undefined') {
+                console.log('LivekitClient found, using as LiveKit');
+                window.LiveKit = LivekitClient;
+                notifyLiveKitReady();
+            } else if (window.LivekitClient) {
+                console.log('window.LivekitClient found, using as LiveKit');
+                window.LiveKit = window.LivekitClient;
+                notifyLiveKitReady();
+            } else {
+                console.error('LiveKit failed to load from local file');
+                console.log('Available globals:', Object.keys(window).filter(key => key.toLowerCase().includes('live')));
+            }
+        }, 100); // Give the script time to execute
     </script>
 </head>
 <body>
