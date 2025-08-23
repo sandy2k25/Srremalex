@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__, static_folder='static')
 
 # LiveKit configuration from environment variables
-LIVEKIT_API_KEY = os.getenv("LIVEKIT_API_KEY", "devkey")
-LIVEKIT_API_SECRET = os.getenv("LIVEKIT_API_SECRET", "secret")  
-LIVEKIT_URL = os.getenv("LIVEKIT_URL", "ws://localhost:7880")
+LIVEKIT_API_KEY = os.getenv("LIVEKIT_API_KEY", "APITMKfqYVjk79h")
+LIVEKIT_API_SECRET = os.getenv("LIVEKIT_API_SECRET", "gCkm5chxksS9KKIUrWVDhf7TDVRVeqleZHf49SFPLBMA")  
+LIVEKIT_URL = os.getenv("LIVEKIT_URL", "wss://sr-fa31r2za.livekit.cloud")
 
 # Default room name for Alex agent
 DEFAULT_ROOM_NAME = "alex-voice-chat"
