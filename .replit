@@ -4,6 +4,7 @@ expertMode = true
 
 [nix]
 channel = "stable-25_05"
+packages = ["livekit"]
 
 [workflows]
 runButton = "Project"
@@ -20,6 +21,14 @@ args = "Install Dependencies"
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "Web Server"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "LiveKit Server"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Alex Agent"
 
 [[workflows.workflow]]
 name = "Install Dependencies"
@@ -44,6 +53,36 @@ waitForPort = 5000
 [workflows.workflow.metadata]
 outputType = "webview"
 
+[[workflows.workflow]]
+name = "LiveKit Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "livekit-server --dev --bind 0.0.0.0 --port 7880"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "Alex Agent"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python agent.py dev"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 7880
+externalPort = 3001
+
+[[ports]]
+localPort = 7881
+externalPort = 3000
