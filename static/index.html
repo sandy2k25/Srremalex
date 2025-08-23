@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alex - Your Voice AI Assistant</title>
+    <title>Alex - AI Voice Agent by Stremini AI</title>
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="/static/livekit-client.umd.min.js"></script>
     <script>
         // Global variable to track LiveKit loading status
@@ -41,78 +44,84 @@
     </script>
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <div class="logo">
-                <i class="fas fa-robot"></i>
-                <h1>Alex</h1>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="brand">
+                    <img src="/static/stremini-logo.png" alt="Stremini AI" class="brand-logo">
+                    <div class="brand-text">
+                        <h1>Alex</h1>
+                        <p>AI Voice Agent</p>
+                    </div>
+                </div>
+                <div class="connection-status" id="connectionStatus">
+                    <div class="status-dot" id="statusIndicator"></div>
+                    <span id="statusText">Disconnected</span>
+                </div>
             </div>
-            <p class="subtitle">Your Warm & Friendly Voice AI Assistant</p>
         </header>
 
-        <main class="main-content">
-            <div class="connection-status" id="connectionStatus">
-                <i class="fas fa-circle status-indicator" id="statusIndicator"></i>
-                <span id="statusText">Disconnected</span>
-            </div>
-
-            <div class="voice-interface">
-                <div class="avatar-container">
-                    <div class="avatar" id="avatar">
-                        <i class="fas fa-microphone-alt"></i>
-                    </div>
-                    <div class="audio-visualizer" id="audioVisualizer">
-                        <div class="bar"></div>
-                        <div class="bar"></div>
-                        <div class="bar"></div>
-                        <div class="bar"></div>
-                        <div class="bar"></div>
+        <!-- Main Interface -->
+        <main class="main-interface">
+            <div class="agent-container">
+                <!-- Agent Avatar -->
+                <div class="agent-avatar-wrapper">
+                    <div class="agent-avatar" id="avatar">
+                        <div class="avatar-inner">
+                            <img src="/static/stremini-logo.png" alt="Alex" class="avatar-logo">
+                        </div>
+                        <div class="avatar-ring" id="avatarRing"></div>
+                        <div class="pulse-ring" id="pulseRing"></div>
                     </div>
                 </div>
 
-                <div class="controls">
-                    <button id="connectBtn" class="btn btn-primary">
-                        <i class="fas fa-phone"></i>
-                        Connect to Alex
-                    </button>
-                    <button id="micBtn" class="btn btn-secondary" disabled>
+                <!-- Agent Status -->
+                <div class="agent-status">
+                    <h2 id="agentStatusText">Ready to chat</h2>
+                    <p id="agentSubtitle">Click to start conversation with Alex</p>
+                </div>
+
+                <!-- Audio Visualizer -->
+                <div class="audio-visualizer" id="audioVisualizer">
+                    <div class="wave"></div>
+                    <div class="wave"></div>
+                    <div class="wave"></div>
+                    <div class="wave"></div>
+                    <div class="wave"></div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="control-panel">
+                <button id="connectBtn" class="primary-btn">
+                    <i class="fas fa-play"></i>
+                    <span>Start Conversation</span>
+                </button>
+                
+                <div class="secondary-controls">
+                    <button id="micBtn" class="control-btn" disabled title="Microphone">
                         <i class="fas fa-microphone"></i>
-                        Microphone
                     </button>
-                    <button id="speakerBtn" class="btn btn-secondary" disabled>
+                    <button id="speakerBtn" class="control-btn" disabled title="Speaker">
                         <i class="fas fa-volume-up"></i>
-                        Speaker
                     </button>
-                </div>
-
-                <div class="conversation-info" id="conversationInfo">
-                    <p>Click "Connect to Alex" to start your voice conversation!</p>
-                    <div class="features">
-                        <div class="feature">
-                            <i class="fas fa-heart"></i>
-                            <span>Warm & Empathetic</span>
-                        </div>
-                        <div class="feature">
-                            <i class="fas fa-brain"></i>
-                            <span>Knowledgeable</span>
-                        </div>
-                        <div class="feature">
-                            <i class="fas fa-hands-helping"></i>
-                            <span>Supportive</span>
-                        </div>
-                    </div>
                 </div>
             </div>
 
+            <!-- Welcome Message -->
+            <div class="welcome-message" id="conversationInfo">
+                <p>Alex is a warm and empathetic AI assistant created by Sandy from Stremini AI. Ready to help with natural voice conversations.</p>
+            </div>
+
+            <!-- Chat Transcript -->
             <div class="chat-transcript" id="chatTranscript" style="display: none;">
-                <h3>Conversation Transcript</h3>
+                <div class="transcript-header">
+                    <h3>Conversation</h3>
+                </div>
                 <div class="messages" id="messages"></div>
             </div>
         </main>
-
-        <footer class="footer">
-            <p>Created by Sandy from Stremini AI</p>
-        </footer>
     </div>
 
     <!-- Audio elements for remote audio -->

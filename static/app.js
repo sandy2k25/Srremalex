@@ -5,9 +5,12 @@ class AlexVoiceAgent {
         this.isConnected = false;
         this.isMuted = false;
         this.isSpeakerEnabled = true;
+        this.isAlexSpeaking = false;
+        this.isUserSpeaking = false;
         
         this.initializeElements();
         this.setupEventListeners();
+        this.initializeUI();
     }
 
     initializeElements() {
@@ -17,17 +20,53 @@ class AlexVoiceAgent {
         this.statusIndicator = document.getElementById('statusIndicator');
         this.statusText = document.getElementById('statusText');
         this.avatar = document.getElementById('avatar');
+        this.avatarRing = document.getElementById('avatarRing');
+        this.pulseRing = document.getElementById('pulseRing');
         this.audioVisualizer = document.getElementById('audioVisualizer');
+        this.agentStatusText = document.getElementById('agentStatusText');
+        this.agentSubtitle = document.getElementById('agentSubtitle');
         this.conversationInfo = document.getElementById('conversationInfo');
         this.chatTranscript = document.getElementById('chatTranscript');
         this.messages = document.getElementById('messages');
         this.remoteAudio = document.getElementById('remoteAudio');
     }
 
+    initializeUI() {
+        // Set initial UI state
+        this.updateAgentStatus('Ready to chat', 'Click to start conversation with Alex');
+        this.speakerBtn.classList.add('active'); // Speaker enabled by default
+    }
+
     setupEventListeners() {
         this.connectBtn.addEventListener('click', () => this.toggleConnection());
         this.micBtn.addEventListener('click', () => this.toggleMicrophone());
         this.speakerBtn.addEventListener('click', () => this.toggleSpeaker());
+        
+        // Avatar click to connect/disconnect
+        this.avatar.addEventListener('click', () => this.toggleConnection());
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && this.isConnected) {
+                e.preventDefault();
+                this.handleSpacePress(true);
+            }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            if (e.code === 'Space' && this.isConnected) {
+                e.preventDefault();
+                this.handleSpacePress(false);
+            }
+        });
+    }
+
+    handleSpacePress(isPressed) {
+        if (isPressed && !this.isUserSpeaking) {
+            this.setUserSpeaking(true);
+        } else if (!isPressed && this.isUserSpeaking) {
+            this.setUserSpeaking(false);
+        }
     }
 
     async toggleConnection() {
@@ -44,11 +83,13 @@ class AlexVoiceAgent {
         
         try {
             this.updateStatus('Connecting...', false);
+            this.updateAgentStatus('Connecting...', 'Establishing connection to Alex');
             this.connectBtn.disabled = true;
 
             // Wait for LiveKit library to be available
             if (!window.liveKitLoaded || typeof LiveKit === 'undefined') {
-                this.updateStatus('Loading LiveKit library...', false);
+                this.updateStatus('Loading libraries...', false);
+                this.updateAgentStatus('Loading...', 'Preparing voice system');
                 await this.waitForLiveKit();
             }
 
@@ -83,46 +124,32 @@ class AlexVoiceAgent {
                 autoSubscribe: true,
             });
             
-            // Enable microphone by default with better handling  
+            // Enable microphone by default
             try {
                 await this.enableMicrophone();
             } catch (micError) {
-                // Continue even if microphone fails - user can try manually later
-                console.warn('Initial microphone setup failed, continuing anyway:', micError);
-                this.addMessage('System', '⚠️ Click the microphone button to enable voice chat with Alex');
+                console.warn('Initial microphone setup failed:', micError);
+                this.addMessage('System', '⚠️ Please click the microphone button to enable voice chat');
             }
             
             this.isConnected = true;
-            this.updateStatus('Connected to Alex', true);
+            this.updateStatus('Connected', true);
+            this.updateAgentStatus('Connected', 'Alex is listening and ready to chat');
             this.updateUI();
             
             console.log('Connected to room:', room);
-            this.addMessage('System', 'Connected to Alex! Start speaking to begin your conversation.');
+            this.addMessage('System', 'Connected to Alex! Start speaking naturally.');
 
         } catch (error) {
             console.error('Connection failed:', error);
-            console.error('Error details:', {
-                name: error.name,
-                message: error.message,
-                code: error.code,
-                reason: error.reason,
-                stack: error.stack,
-                url: url || 'URL not available',
-                token: token ? 'Token received' : 'No token',
-                errorType: typeof error,
-                errorConstructor: error.constructor.name
-            });
             
-            let errorMessage = 'Unknown connection error';
+            let errorMessage = 'Connection failed';
             if (error.message) {
                 errorMessage = error.message;
-            } else if (error.reason) {
-                errorMessage = error.reason;
-            } else if (error.code) {
-                errorMessage = `Error code: ${error.code}`;
             }
             
-            this.updateStatus(`Connection failed: ${errorMessage}`, false);
+            this.updateStatus(errorMessage, false);
+            this.updateAgentStatus('Connection failed', 'Please try again');
             this.addMessage('System', `Connection failed: ${errorMessage}`);
         } finally {
             this.connectBtn.disabled = false;
@@ -132,6 +159,7 @@ class AlexVoiceAgent {
     async disconnect() {
         try {
             this.updateStatus('Disconnecting...', false);
+            this.updateAgentStatus('Disconnecting...', 'Ending conversation');
             
             if (this.room) {
                 await this.room.disconnect();
@@ -139,7 +167,10 @@ class AlexVoiceAgent {
             }
             
             this.isConnected = false;
+            this.setAlexSpeaking(false);
+            this.setUserSpeaking(false);
             this.updateStatus('Disconnected', false);
+            this.updateAgentStatus('Ready to chat', 'Click to start conversation with Alex');
             this.updateUI();
             this.addMessage('System', 'Disconnected from Alex.');
             
@@ -158,6 +189,7 @@ class AlexVoiceAgent {
             console.log('Room disconnected');
             this.isConnected = false;
             this.updateStatus('Disconnected', false);
+            this.updateAgentStatus('Ready to chat', 'Click to start conversation with Alex');
             this.updateUI();
         });
 
@@ -170,12 +202,28 @@ class AlexVoiceAgent {
                 audioElement.autoplay = true;
                 document.body.appendChild(audioElement);
                 
-                // Show that Alex is speaking
-                this.showAlexSpeaking(true);
+                // Show Alex is speaking
+                this.setAlexSpeaking(true);
+                this.updateAgentStatus('Speaking', 'Alex is responding');
                 
-                // Hide speaking indicator when audio ends
+                // Monitor audio events
+                audioElement.addEventListener('play', () => {
+                    this.setAlexSpeaking(true);
+                });
+                
+                audioElement.addEventListener('pause', () => {
+                    this.setAlexSpeaking(false);
+                });
+                
+                audioElement.addEventListener('ended', () => {
+                    this.setAlexSpeaking(false);
+                    this.updateAgentStatus('Listening', 'Waiting for your voice');
+                });
+                
+                // Hide speaking indicator when track ends
                 track.on('ended', () => {
-                    this.showAlexSpeaking(false);
+                    this.setAlexSpeaking(false);
+                    this.updateAgentStatus('Listening', 'Waiting for your voice');
                 });
             }
         });
@@ -183,7 +231,7 @@ class AlexVoiceAgent {
         this.room.on('trackUnsubscribed', (track, publication, participant) => {
             console.log('Track unsubscribed:', track.kind, participant.identity);
             track.detach();
-            this.showAlexSpeaking(false);
+            this.setAlexSpeaking(false);
         });
 
         this.room.on('participantConnected', (participant) => {
@@ -200,7 +248,7 @@ class AlexVoiceAgent {
             }
         });
 
-        // Handle audio level changes for visualization
+        // Handle local audio
         this.room.on('localTrackPublished', (publication, participant) => {
             if (publication.track && publication.track.kind === 'audio') {
                 this.setupAudioLevelMonitoring(publication.track);
@@ -209,56 +257,17 @@ class AlexVoiceAgent {
     }
 
     setupAudioLevelMonitoring(track) {
-        // Monitor audio levels for visualization
+        // Monitor microphone activity
         if (track.source === 'microphone') {
-            // This would typically require additional audio processing
-            // For now, we'll simulate based on speaking state
-            this.startAudioVisualization();
+            console.log('Setting up audio monitoring for microphone');
         }
-    }
-
-    startAudioVisualization() {
-        // Simple audio visualization simulation
-        let isAnimating = false;
-        
-        const animate = () => {
-            if (!this.isConnected) return;
-            
-            // Randomly animate bars to simulate audio levels
-            const bars = this.audioVisualizer.querySelectorAll('.bar');
-            bars.forEach(bar => {
-                const height = Math.random() * 20 + 5;
-                bar.style.height = `${height}px`;
-            });
-            
-            if (isAnimating) {
-                requestAnimationFrame(animate);
-            }
-        };
-
-        // Start animation when speaking
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' && this.isConnected && !isAnimating) {
-                isAnimating = true;
-                this.audioVisualizer.classList.add('active');
-                animate();
-            }
-        });
-
-        document.addEventListener('keyup', (e) => {
-            if (e.code === 'Space') {
-                isAnimating = false;
-                this.audioVisualizer.classList.remove('active');
-            }
-        });
     }
 
     async enableMicrophone() {
         try {
-            // First, show user we're requesting permission
             this.addMessage('System', 'Requesting microphone access...');
             
-            // Request microphone permission first
+            // Request microphone permission
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 audio: {
                     echoCancellation: true,
@@ -271,26 +280,27 @@ class AlexVoiceAgent {
             // Stop the test stream
             stream.getTracks().forEach(track => track.stop());
             
-            // Now enable microphone through LiveKit
+            // Enable microphone through LiveKit
             await this.room.localParticipant.setMicrophoneEnabled(true);
             this.isMuted = false;
             this.micBtn.classList.add('active');
+            this.micBtn.classList.remove('muted');
             console.log('Microphone enabled successfully');
-            this.addMessage('System', '✓ Microphone enabled! Start speaking - Alex will respond with voice.');
+            this.addMessage('System', '✓ Microphone enabled! Alex can now hear you.');
         } catch (error) {
             console.error('Failed to enable microphone:', error);
             
             if (error.name === 'NotAllowedError') {
-                this.addMessage('System', '🎤 Please click "Allow" when your browser asks for microphone permission. Alex needs to hear you to respond!');
+                this.addMessage('System', '🎤 Please allow microphone access for voice chat with Alex');
             } else if (error.name === 'NotFoundError') {
-                this.addMessage('System', '🎤 No microphone found. Please connect a microphone to chat with Alex.');
+                this.addMessage('System', '🎤 No microphone found. Please connect a microphone.');
             } else {
-                this.addMessage('System', '🎤 Microphone access failed. Please check your browser permissions and try again.');
+                this.addMessage('System', '🎤 Microphone access failed. Please check permissions.');
             }
             
-            // Still continue - maybe user will fix it
             this.isMuted = true;
             this.micBtn.classList.remove('active');
+            this.micBtn.classList.add('muted');
         }
     }
 
@@ -304,11 +314,11 @@ class AlexVoiceAgent {
             
             if (enabled) {
                 this.micBtn.classList.add('active');
-                this.micBtn.innerHTML = '<i class="fas fa-microphone"></i> Microphone';
+                this.micBtn.classList.remove('muted');
                 this.addMessage('System', 'Microphone enabled');
             } else {
                 this.micBtn.classList.remove('active');
-                this.micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i> Muted';
+                this.micBtn.classList.add('muted');
                 this.addMessage('System', 'Microphone muted');
             }
         } catch (error) {
@@ -327,20 +337,40 @@ class AlexVoiceAgent {
 
         if (this.isSpeakerEnabled) {
             this.speakerBtn.classList.add('active');
-            this.speakerBtn.innerHTML = '<i class="fas fa-volume-up"></i> Speaker';
+            this.speakerBtn.classList.remove('muted');
         } else {
             this.speakerBtn.classList.remove('active');
-            this.speakerBtn.innerHTML = '<i class="fas fa-volume-mute"></i> Muted';
+            this.speakerBtn.classList.add('muted');
         }
     }
 
-    showAlexSpeaking(isSpeaking) {
+    setAlexSpeaking(isSpeaking) {
+        this.isAlexSpeaking = isSpeaking;
+        
         if (isSpeaking) {
-            this.avatar.classList.add('talking');
+            this.avatar.classList.add('speaking');
+            this.avatar.classList.remove('listening');
             this.audioVisualizer.classList.add('active');
         } else {
-            this.avatar.classList.remove('talking');
+            this.avatar.classList.remove('speaking');
+            if (this.isConnected) {
+                this.avatar.classList.add('listening');
+            }
             this.audioVisualizer.classList.remove('active');
+        }
+    }
+
+    setUserSpeaking(isSpeaking) {
+        this.isUserSpeaking = isSpeaking;
+        
+        if (isSpeaking) {
+            this.updateAgentStatus('Listening', 'Processing your voice');
+            this.audioVisualizer.classList.add('active');
+        } else {
+            if (!this.isAlexSpeaking) {
+                this.updateAgentStatus('Thinking', 'Preparing response');
+                this.audioVisualizer.classList.remove('active');
+            }
         }
     }
 
@@ -353,44 +383,46 @@ class AlexVoiceAgent {
         }
     }
 
+    updateAgentStatus(title, subtitle) {
+        this.agentStatusText.textContent = title;
+        this.agentSubtitle.textContent = subtitle;
+    }
+
     async waitForLiveKit() {
         return new Promise((resolve, reject) => {
-            // If LiveKit is already loaded, resolve immediately
             if (window.liveKitLoaded && typeof LiveKit !== 'undefined') {
                 console.log('LiveKit library is already available');
                 resolve();
                 return;
             }
             
-            // Add callback to be notified when LiveKit loads
             window.liveKitCallbacks.push(resolve);
             
-            // Set a timeout as backup
             setTimeout(() => {
                 if (!window.liveKitLoaded) {
-                    reject(new Error('LiveKit library failed to load within timeout'));
+                    reject(new Error('LiveKit library failed to load'));
                 }
-            }, 15000); // 15 second timeout
+            }, 15000);
         });
     }
 
     updateUI() {
         if (this.isConnected) {
-            this.connectBtn.innerHTML = '<i class="fas fa-phone-slash"></i> Disconnect';
-            this.connectBtn.className = 'btn btn-danger';
+            this.connectBtn.innerHTML = '<i class="fas fa-stop"></i><span>End Conversation</span>';
+            this.connectBtn.classList.add('disconnect');
             this.micBtn.disabled = false;
             this.speakerBtn.disabled = false;
             this.conversationInfo.style.display = 'none';
             this.chatTranscript.style.display = 'block';
+            this.avatar.classList.add('listening');
         } else {
-            this.connectBtn.innerHTML = '<i class="fas fa-phone"></i> Connect to Alex';
-            this.connectBtn.className = 'btn btn-primary';
+            this.connectBtn.innerHTML = '<i class="fas fa-play"></i><span>Start Conversation</span>';
+            this.connectBtn.classList.remove('disconnect');
             this.micBtn.disabled = true;
             this.speakerBtn.disabled = true;
-            this.micBtn.classList.remove('active');
-            this.speakerBtn.classList.add('active');
+            this.micBtn.classList.remove('active', 'muted');
             this.conversationInfo.style.display = 'block';
-            // Don't hide transcript to preserve conversation history
+            this.avatar.classList.remove('speaking', 'listening');
         }
     }
 
@@ -398,14 +430,15 @@ class AlexVoiceAgent {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender.toLowerCase()}`;
         
-        const senderSpan = document.createElement('div');
-        senderSpan.className = 'sender';
-        senderSpan.textContent = sender;
+        if (sender !== 'System') {
+            const senderSpan = document.createElement('div');
+            senderSpan.className = 'sender';
+            senderSpan.textContent = sender;
+            messageDiv.appendChild(senderSpan);
+        }
         
         const textDiv = document.createElement('div');
         textDiv.textContent = text;
-        
-        messageDiv.appendChild(senderSpan);
         messageDiv.appendChild(textDiv);
         
         this.messages.appendChild(messageDiv);
@@ -417,53 +450,5 @@ class AlexVoiceAgent {
 document.addEventListener('DOMContentLoaded', () => {
     window.alexAgent = new AlexVoiceAgent();
     
-    // Add some helpful instructions
-    const instructions = document.createElement('div');
-    instructions.className = 'instructions';
-    instructions.innerHTML = `
-        <p><strong>How to use:</strong></p>
-        <ul>
-            <li>Click "Connect to Alex" to join the voice conversation</li>
-            <li>Speak naturally - Alex will hear you and respond</li>
-            <li>Use the microphone button to mute/unmute yourself</li>
-            <li>Use the speaker button to control Alex's audio</li>
-        </ul>
-    `;
-    
-    // Add instructions to conversation info
-    const conversationInfo = document.getElementById('conversationInfo');
-    conversationInfo.appendChild(instructions);
+    console.log('Alex Voice Agent initialized - ElevenLabs style UI ready');
 });
-
-// Add some CSS for instructions
-const style = document.createElement('style');
-style.textContent = `
-    .btn-danger {
-        background: linear-gradient(135deg, #dc3545, #c82333);
-        color: white;
-    }
-    
-    .btn-danger:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
-    }
-    
-    .instructions {
-        margin-top: 20px;
-        padding: 20px;
-        background: rgba(102, 126, 234, 0.1);
-        border-radius: 15px;
-        text-align: left;
-    }
-    
-    .instructions ul {
-        margin-top: 10px;
-        padding-left: 20px;
-    }
-    
-    .instructions li {
-        margin-bottom: 5px;
-        color: #666;
-    }
-`;
-document.head.appendChild(style);
