@@ -73,6 +73,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
 }
 
 .brand {
@@ -517,9 +518,10 @@ body {
     }
     
     .header-content {
-        flex-direction: column;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
         gap: 1rem;
-        align-items: flex-start;
     }
     
     .main-interface {
