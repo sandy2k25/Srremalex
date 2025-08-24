@@ -13,31 +13,37 @@ Your Alex Voice Agent is now fully compatible with Render.com! You can deploy bo
 
 ## 🌐 Deployment Options
 
-### Option 1: Blueprint Deployment (Recommended)
+### ⚠️ **Important: Free Tier Limitation**
+Render's free tier **does not support background workers**. The LiveKit agent needs to run separately.
 
-1. **Push to Git**: Commit all files to your repository
-2. **Connect to Render**:
-   - Go to [render.com](https://render.com) and sign in
-   - Click "New" → "Blueprint"
-   - Connect your repository
-   - Render will auto-detect `render.yaml`
+### Option 1: Render Web + Replit Agent (Recommended for Free)
 
-### Option 2: Manual Service Creation
+1. **Deploy Frontend to Render**:
+   - Push to Git and connect to Render
+   - Deploy as web service (frontend + API)
+   - **Cost**: Free
 
-1. **Web Service**:
-   - Click "New" → "Web Service"
-   - Connect repository
-   - Configure:
-     - **Build Command**: `pip install -r requirements.txt`
-     - **Start Command**: `python web_server.py`
-     - **Environment**: Python 3
+2. **Keep Agent on Replit**:
+   - Keep the voice agent running here on Replit
+   - Users connect to the same LiveKit server
+   - **Cost**: Free
 
-2. **Background Service** (for LiveKit Agent):
-   - Click "New" → "Background Worker"
-   - Same repository
-   - Configure:
-     - **Build Command**: `pip install -r requirements.txt`
-     - **Start Command**: `python agent.py`
+### Option 2: Full Render Deployment (Paid Plans)
+
+1. **Web Service** (Free):
+   - Frontend and API endpoints
+
+2. **Background Worker** ($7/month):
+   - LiveKit agent running 24/7
+   - Upgrade to Starter plan required
+
+### Option 3: Alternative Platforms for Agent
+
+**Free Options for Agent:**
+- **Railway.app** - $5 credit, supports background services
+- **Fly.io** - Free tier with background processes
+- **Render cron jobs** - Run agent periodically (limited)
+- **Keep on Replit** - Always-on with Replit Core ($20/month)
 
 ## 🔧 Environment Variables
 

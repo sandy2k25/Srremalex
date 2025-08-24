@@ -1,5 +1,5 @@
 services:
-  # Web Service for the main application
+  # Web Service for the main application (Free tier compatible)
   - type: web
     name: alex-voice-agent
     env: python
@@ -13,21 +13,7 @@ services:
         value: gCkm5chxksS9KKIUrWVDhf7TDVRVeqleZHf49SFPLBMA
       - key: LIVEKIT_URL
         value: wss://sr-fa31r2za.livekit.cloud
-      - key: PORT
-        value: "10000"
-    healthCheckPath: /
+    healthCheckPath: /health
 
-  # Background Service for LiveKit Agent
-  - type: worker
-    name: alex-livekit-agent
-    env: python
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "python agent.py"
-    plan: free
-    envVars:
-      - key: LIVEKIT_API_KEY
-        value: APITMKfqYVjk79h
-      - key: LIVEKIT_API_SECRET
-        value: gCkm5chxksS9KKIUrWVDhf7TDVRVeqleZHf49SFPLBMA
-      - key: LIVEKIT_URL
-        value: wss://sr-fa31r2za.livekit.cloud
+  # Note: Background workers require paid plans on Render
+  # For free deployment, keep the agent running on Replit or use alternatives below
