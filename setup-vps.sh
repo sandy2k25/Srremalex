@@ -26,10 +26,8 @@ GEMINI_API_KEY=your_gemini_api_key_here
 PORT=5000
 EOF
 
-# Update ecosystem config with current directory
-echo "Updating ecosystem config..."
-CURRENT_DIR=$(pwd)
-sed -i "s|/home/username/alex-voice-agent|$CURRENT_DIR|g" ecosystem.config.js
+# Ecosystem config now uses relative paths - no update needed
+echo "Ecosystem config ready with relative paths..."
 
 # Make scripts executable
 chmod +x setup-vps.sh

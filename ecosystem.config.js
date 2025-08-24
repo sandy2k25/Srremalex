@@ -2,9 +2,8 @@ module.exports = {
   apps: [
     {
       name: 'alex-web-server',
-      script: 'web_server.py',
+      script: './web_server.py',
       interpreter: 'python3',
-      cwd: '/home/username/alex-voice-agent', // Update this path
       instances: 1,
       autorestart: true,
       watch: false,
@@ -24,9 +23,8 @@ module.exports = {
     },
     {
       name: 'alex-voice-agent',
-      script: 'agent.py',
+      script: './agent.py',
       interpreter: 'python3',
-      cwd: '/home/username/alex-voice-agent', // Update this path
       instances: 1,
       autorestart: true,
       watch: false,
