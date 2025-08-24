@@ -1,0 +1,26 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "python web_server.py"
+healthcheckPath = "/health"
+restartPolicyType = "ON_FAILURE"
+
+[[services]]
+name = "web"
+source = "."
+[services.variables]
+LIVEKIT_API_KEY = "APITMKfqYVjk79h"
+LIVEKIT_API_SECRET = "gCkm5chxksS9KKIUrWVDhf7TDVRVeqleZHf49SFPLBMA"
+LIVEKIT_URL = "wss://sr-fa31r2za.livekit.cloud"
+
+[[services]]
+name = "agent"
+source = "."
+[services.variables]
+LIVEKIT_API_KEY = "APITMKfqYVjk79h"
+LIVEKIT_API_SECRET = "gCkm5chxksS9KKIUrWVDhf7TDVRVeqleZHf49SFPLBMA"
+LIVEKIT_URL = "wss://sr-fa31r2za.livekit.cloud"
+[services.deploy]
+startCommand = "python agent.py"
+restartPolicyType = "ALWAYS"
