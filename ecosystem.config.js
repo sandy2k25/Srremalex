@@ -23,8 +23,8 @@ module.exports = {
     },
     {
       name: 'alex-voice-agent',
-      script: './agent.py',
-      interpreter: 'python3',
+      script: 'python',
+      args: '-m livekit.agents.cli dev agent.py',
       instances: 1,
       autorestart: true,
       watch: false,
@@ -35,7 +35,8 @@ module.exports = {
         LIVEKIT_API_KEY: 'APITMKfqYVjk79h',
         LIVEKIT_API_SECRET: 'gCkm5chxksS9KKIUrWVDhf7TDVRVeqleZHf49SFPLBMA',
         LIVEKIT_URL: 'wss://sr-fa31r2za.livekit.cloud',
-        GEMINI_API_KEY: 'your_gemini_api_key_here'
+        GEMINI_API_KEY: 'your_gemini_api_key_here',
+        PYTHONPATH: '.'
       },
       error_file: './logs/agent-error.log',
       out_file: './logs/agent-out.log',

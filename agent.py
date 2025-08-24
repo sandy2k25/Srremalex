@@ -2,6 +2,13 @@ import asyncio
 import logging
 import os
 
+# Load environment variables from .env file (for VPS deployment)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not installed, use system environment variables
+
 from livekit import agents
 from livekit.agents import AgentSession, Agent
 from livekit.plugins import google
