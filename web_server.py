@@ -25,8 +25,14 @@ DEFAULT_ROOM_NAME = "alex-voice-chat"
 @app.route('/')
 def index():
     """Serve the main web interface"""
-    with open('static/index.html', 'r') as f:
-        return render_template_string(f.read())
+    try:
+        # Try to serve from static folder first
+        with open('static/index.html', 'r') as f:
+            return render_template_string(f.read())
+    except FileNotFoundError:
+        # Fall back to root directory for Render deployment
+        with open('index.html', 'r') as f:
+            return render_template_string(f.read())
 
 
 @app.route('/api/token')
@@ -106,5 +112,8 @@ if __name__ == '__main__':
     logger.info(f"LiveKit URL: {LIVEKIT_URL}")
     logger.info(f"Default Room: {DEFAULT_ROOM_NAME}")
     
+    # Get port from environment variable for Render compatibility
+    port = int(os.getenv("PORT", 5000))
+    
     # Run the Flask application
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=port, debug=False)
