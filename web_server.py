@@ -7,6 +7,13 @@ from livekit import api
 from livekit.api import AccessToken, VideoGrants
 import jwt
 
+# Load environment variables from .env file (for VPS deployment)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not installed, use system environment variables
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
