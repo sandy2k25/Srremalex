@@ -1,0 +1,80 @@
+{
+  "name": "Alex Voice Agent Development Environment",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.11-bullseye",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "nodeGypDependencies": true,
+      "version": "18"
+    },
+    "ghcr.io/devcontainers/features/git:1": {
+      "ppa": true,
+      "version": "latest"
+    }
+  },
+  
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.pylint",
+        "ms-python.flake8",
+        "ms-python.black-formatter",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-json",
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.js-debug",
+        "ms-toolsai.jupyter",
+        "ms-python.debugpy"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": true,
+        "python.formatting.provider": "black",
+        "editor.formatOnSave": true,
+        "files.autoSave": "afterDelay",
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+  
+  "forwardPorts": [5000, 7880, 8080],
+  "portsAttributes": {
+    "5000": {
+      "label": "Alex Voice Agent Web Server",
+      "onAutoForward": "notify"
+    },
+    "7880": {
+      "label": "LiveKit Server (if local)",
+      "onAutoForward": "ignore"
+    },
+    "8080": {
+      "label": "Development Server",
+      "onAutoForward": "ignore"
+    }
+  },
+  
+  "containerEnv": {
+    "LIVEKIT_API_KEY": "APITMKfqYVjk79h",
+    "LIVEKIT_API_SECRET": "gCkm5chxksS9KKIUrWVDhf7TDVRVeqleZHf49SFPLBMA",
+    "LIVEKIT_URL": "wss://sr-fa31r2za.livekit.cloud",
+    "PORT": "5000",
+    "PYTHONPATH": "/workspaces/alex-voice-agent"
+  },
+  
+  "postCreateCommand": ".devcontainer/setup.sh",
+  
+  "remoteUser": "vscode",
+  
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/alex-voice-agent,type=bind,consistency=cached",
+  "workspaceFolder": "/workspaces/alex-voice-agent",
+  
+  "mounts": [
+    "source=${localWorkspaceFolder}/.env,target=/workspaces/alex-voice-agent/.env,type=bind,consistency=cached"
+  ],
+  
+  "runArgs": [
+    "--env-file", ".env"
+  ]
+}
