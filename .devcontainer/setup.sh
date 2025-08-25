@@ -57,9 +57,10 @@ mkdir -p logs
 
 echo "✅ Development environment setup complete!"
 echo ""
-echo "🎯 Quick Start Commands:"
+echo "🎯 Quick Start Commands for GitHub Codespaces:"
 echo "  • Start web server: python web_server.py"
-echo "  • Start voice agent: python agent.py"
+echo "  • Start voice agent: python .devcontainer/codespace-agent.py"
+echo "  • Alternative: Use the LiveKit CLI: python -m livekit.agents.cli dev agent.py"
 echo "  • Install additional deps: pip install <package>"
 echo ""
 echo "🔑 Environment setup:"

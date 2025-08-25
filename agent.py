@@ -9,6 +9,8 @@ try:
 except ImportError:
     pass  # dotenv not installed, use system environment variables
 
+# Ensure environment variables persist for child processes
+
 from livekit import agents
 from livekit.agents import AgentSession, Agent
 from livekit.plugins import google
