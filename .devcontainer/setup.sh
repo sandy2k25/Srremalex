@@ -38,11 +38,15 @@ if [ -f "package.json" ]; then
     npm install
 fi
 
-# Copy .env.example to .env if .env doesn't exist
-if [ ! -f ".env" ] && [ -f ".env.example" ]; then
+# Check for API keys (Codespace secrets or .env file)
+if [ -n "$GEMINI_API_KEY" ]; then
+    echo "✅ GEMINI_API_KEY found in environment (from Codespace secrets)"
+elif [ ! -f ".env" ] && [ -f ".env.example" ]; then
     echo "🔧 Creating .env file from .env.example..."
     cp .env.example .env
     echo "⚠️  Remember to update .env with your actual API keys!"
+elif [ -f ".env" ]; then
+    echo "✅ .env file exists - using local environment file"
 fi
 
 # Make scripts executable
@@ -58,8 +62,12 @@ echo "  • Start web server: python web_server.py"
 echo "  • Start voice agent: python -m livekit.agents.cli dev agent.py"
 echo "  • Install additional deps: pip install <package>"
 echo ""
-echo "🔑 Don't forget to:"
-echo "  • Update .env with your GEMINI_API_KEY"
+echo "🔑 Environment setup:"
+if [ -n "$GEMINI_API_KEY" ]; then
+    echo "  ✅ GEMINI_API_KEY configured via Codespace secrets"
+else
+    echo "  • Update .env with your GEMINI_API_KEY"
+fi
 echo "  • Add other API keys as needed (OPENAI_API_KEY, etc.)"
 echo ""
 echo "🌐 Your app will be available at:"

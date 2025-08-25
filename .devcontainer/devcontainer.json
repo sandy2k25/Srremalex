@@ -59,6 +59,7 @@
     "LIVEKIT_API_KEY": "APITMKfqYVjk79h",
     "LIVEKIT_API_SECRET": "gCkm5chxksS9KKIUrWVDhf7TDVRVeqleZHf49SFPLBMA",
     "LIVEKIT_URL": "wss://sr-fa31r2za.livekit.cloud",
+    "GEMINI_API_KEY": "${GEMINI_API_KEY}",
     "PORT": "5000",
     "PYTHONPATH": "/workspaces/alex-voice-agent"
   },
@@ -70,11 +71,7 @@
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/alex-voice-agent,type=bind,consistency=cached",
   "workspaceFolder": "/workspaces/alex-voice-agent",
   
-  "mounts": [
-    "source=${localWorkspaceFolder}/.env,target=/workspaces/alex-voice-agent/.env,type=bind,consistency=cached"
-  ],
-  
-  "runArgs": [
-    "--env-file", ".env"
-  ]
+  "remoteEnv": {
+    "GEMINI_API_KEY": "${GEMINI_API_KEY}"
+  }
 }
