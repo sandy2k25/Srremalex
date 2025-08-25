@@ -61,7 +61,8 @@
     "LIVEKIT_URL": "wss://sr-fa31r2za.livekit.cloud",
     "GEMINI_API_KEY": "${GEMINI_API_KEY}",
     "PORT": "5000",
-    "PYTHONPATH": "/workspaces/alex-voice-agent"
+    "PYTHONPATH": "/workspaces/alex-voice-agent:/home/vscode/.local/lib/python3.11/site-packages",
+    "PATH": "/home/vscode/.local/bin:${PATH}"
   },
   
   "postCreateCommand": ".devcontainer/setup.sh",

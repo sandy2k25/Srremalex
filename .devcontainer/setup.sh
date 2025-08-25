@@ -23,14 +23,26 @@ python -m pip install --upgrade pip
 
 # Install Python dependencies
 echo "🐍 Installing Python dependencies..."
+
+# Upgrade pip first
+python -m pip install --upgrade pip
+
+# Install from requirements.txt
 if [ -f "requirements.txt" ]; then
-    pip install -r requirements.txt
+    echo "Installing from requirements.txt..."
+    python -m pip install -r requirements.txt --user
 fi
 
 # Install from pyproject.toml if available
 if [ -f "pyproject.toml" ]; then
-    pip install -e .
+    echo "Installing from pyproject.toml..."
+    python -m pip install -e . --user
 fi
+
+# Verify key packages are installed
+echo "🔍 Verifying installations..."
+python -c "import flask; print('✅ Flask installed')" 2>/dev/null || echo "⚠️ Flask not found"
+python -c "import livekit; print('✅ LiveKit installed')" 2>/dev/null || echo "⚠️ LiveKit not found"
 
 # Install Node.js dependencies if package.json exists
 if [ -f "package.json" ]; then
