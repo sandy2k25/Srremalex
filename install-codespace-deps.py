@@ -11,7 +11,7 @@ def install_package(package):
     """Install a Python package using pip"""
     try:
         subprocess.check_call([
-            sys.executable, '-m', 'pip', 'install', package, '--user'
+            sys.executable, '-m', 'pip', 'install', package
         ])
         return True
     except subprocess.CalledProcessError:

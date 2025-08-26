@@ -30,13 +30,13 @@ python -m pip install --upgrade pip
 # Install from requirements.txt
 if [ -f "requirements.txt" ]; then
     echo "Installing from requirements.txt..."
-    python -m pip install -r requirements.txt --user
+    python -m pip install -r requirements.txt
 fi
 
 # Install from pyproject.toml if available
 if [ -f "pyproject.toml" ]; then
     echo "Installing from pyproject.toml..."
-    python -m pip install -e . --user
+    python -m pip install -e .
 fi
 
 # Verify key packages are installed
