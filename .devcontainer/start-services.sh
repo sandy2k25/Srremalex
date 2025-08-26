@@ -22,8 +22,8 @@ start_web_server() {
 # Function to start agent
 start_agent() {
     echo "🤖 Starting Alex Voice Agent..."
-    # Use the codespace-optimized agent
-    python .devcontainer/codespace-agent.py
+    # Use LiveKit agents CLI for proper connection handling
+    python -m livekit.agents.cli dev agent.py
 }
 
 # Check if argument provided

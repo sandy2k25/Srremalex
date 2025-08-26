@@ -62,8 +62,9 @@ class AlexCodespaceLauncher:
         """Start the voice agent in a separate process"""
         print("🤖 Starting Alex Voice Agent...")
         try:
+            # Use LiveKit agents CLI for proper connection handling
             self.agent_process = subprocess.Popen([
-                sys.executable, 'agent.py'
+                sys.executable, '-m', 'livekit.agents.cli', 'dev', 'agent.py'
             ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                universal_newlines=True, bufsize=1)
             
