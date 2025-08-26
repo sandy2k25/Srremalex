@@ -89,6 +89,10 @@ async def entrypoint(ctx: agents.JobContext):
     logger.info("Creating Alex with Gemini Live API...")
     
     try:
+        # Connect to the room first
+        await ctx.connect()
+        logger.info("Connected to LiveKit room successfully")
+        
         # Wait for participant to join
         await ctx.wait_for_participant()
         logger.info("Participant joined! Starting Alex voice agent...")
