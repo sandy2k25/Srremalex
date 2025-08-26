@@ -89,6 +89,10 @@ async def entrypoint(ctx: agents.JobContext):
     logger.info("Creating Alex with Gemini Live API...")
     
     try:
+        # Wait for participant to join
+        await ctx.wait_for_participant()
+        logger.info("Participant joined! Starting Alex voice agent...")
+        
         # Create agent session with Gemini Live for native voice processing
         session = AgentSession(
             llm=google.beta.realtime.RealtimeModel(
@@ -110,20 +114,19 @@ async def entrypoint(ctx: agents.JobContext):
         
         logger.info("Alex is now ready for conversation!")
         
-        # Start the session and keep it running
-        logger.info("Alex is now active and listening!")
+        # Brief delay to ensure session is fully ready
+        await asyncio.sleep(2.0)
         
-        # Send initial greeting after a brief delay
-        await asyncio.sleep(3.0)
+        # Alex will respond when user speaks - Gemini Live handles greetings automatically
+        logger.info("Alex ready to respond to voice input")
         
-        # Alex will greet when user speaks - Gemini Live handles this automatically
-        logger.info("Alex is ready to respond to voice input via Gemini Live")
+        logger.info("Alex is now active and listening for voice input!")
         
-        # Keep the session running indefinitely to handle voice conversations
+        # Keep the session running and actively process
         try:
             # This keeps the session alive to process voice input and generate responses
-            while True:
-                await asyncio.sleep(1)
+            while ctx.room.connection_state == "connected":
+                await asyncio.sleep(0.1)  # More responsive loop
                 # The session will automatically handle voice input/output via Gemini Live
         except Exception as session_error:
             logger.error(f"Session error: {session_error}")
